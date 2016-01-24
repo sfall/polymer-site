@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+  <link rel="import" href="../elements/todo-element.html">
+  <link rel="import" href="../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+  <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
+  <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
+  <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="../bower_components/paper-material/paper-material.html">
+  <link rel="import" href="../bower_components/paper-menu/paper-menu.html">
+  <link rel="import" href="../bower_components/paper-item/paper-item.html">
+  <link rel="import" href="../bower_components/paper-input/paper-input.html">
+  <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+  <script src="../js/UUID.js"></script>
+</head>
+
+<dom-module id="todo-app">
+  <style>
+    /* CSS rules for your element */
+  </style>
+  <template>
+    <paper-drawer-panel>
+      <paper-header-panel drawer>
+        <paper-toolbar>
+          <paper-item>Side Bar Title</paper-item>
+        </paper-toolbar>
+        <paper-menu class="list">
+          <template is="dom-if" if="{{!done.length}}">
+            <paper-material>
+              <paper-item>Completed tasks will appear here!</paper-item>
+            </paper-material>
+          </template>
+          <template id="done" is="dom-repeat" items="{{done}}">
+            <paper-item>{{item.task}}<i style="margin-left: 5px;">{{item.user}}</i></paper-item>
+          </template>
+        </paper-menu>
+      </paper-header-panel>
+      <paper-header-panel main>
+        <paper-toolbar>
+          <paper-item>Main Body Title</paper-item>
+        </paper-toolbar>
+        <div style="border-left: 1px solid #ccc;">
+          <!-- To create a new Todo -->
+          <paper-material id="todoEntry" elevation="2">
+            <paper-input id="tTask" label="Task"></paper-input>
+            <paper-input id="tUser" char-counter label="Username" maxlength="16"></paper-input>
+            <paper-fab icon="icons:add" on-tap="postTask"></paper-fab>
+          </paper-material>
+          <div id="todos">
+            <template is="dom-if" if="{{!todo.length}}">
+              <paper-material>
+                <paper-item>No Tasks remain. Updates are Real-Time so stay tuned!</paper-item>
+              </paper-material>
+            </template>
+            <template id="tasks" is="dom-repeat" items="{{todo}}">
+              <todo-element user="{{item.user}}" task="{{item.task}}" rid="{{item.rid}}"></todo-element>
+            </template>
+          </div>
+        </div>
+      </paper-header-panel>
+    </paper-drawer-panel>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: "todo-app",
+    properties: {
+      todo: {
+        type: Array,
+        value: [{user: "Coder", task: "Learn Polymer", rid: 0}]
+      },
+      done: {
+        type: Array,
+        value: []
+      },
+      messages: {
+        type: Array,
+        value: []
+      },
+      present: {
+        type: Array,
+        value: []
+      }
+    },
+    postTask: function (e) {
+      var tsk = this.$.tTask.value,
+          usr = this.$.tUser.value;
+
+      if (tsk == "") {
+        alert("Task is Empty!");
+        return;
+      }
+      if (usr == "") {
+        usr = "Anonymous";
+      }
+      this.$.tTask.value = "";
+      this.$.pub.message = {type: "todo", task: tsk, user: usr, rid: UUID.generate()};
+      this.$.pub.publish();
+    },
+    handleComplete: function (e) {
+      var idx = findWithAttr(this.todo, 'rid', e.target.rid),
+          itm = this.todo[idx];
+
+      itm.task = e.target.task;
+      itm.user = this.$.tUser.value;
+      itm.type = "done";
+      this.$.pub.message = itm;
+      this.$.pub.publish();
+    },
+    ready: function (e) {
+      this.addEventListener('complete', this.handleComplete)
+    }
+  });
+  function findWithAttr(array, attr, value) {
+    for (var i = 0; i < array.length; i += 1) {
+      if (array[i][attr] === value) {
+        return i;
+      }
+    }
+  }
+</script>

@@ -1,0 +1,36 @@
+{
+  "name": "polymer-site",
+  "authors": [
+    "sfall <sfall@my.tnstate.edu>"
+  ],
+  "description": "A sample web app demonstrating PolymerJS",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "polymer"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "iron-icons": " polymerelements/iron-icons",
+    "iron-input": " polymerelements/iron-input",
+    "paper-button": " polymerelements/paper-button",
+    "paper-checkbox": " polymerelements/paper-checkbox",
+    "paper-drawer-panel": " polymerelements/paper-drawer-panel",
+    "paper-fab": " polymerelements/paper-fab",
+    "paper-header-panel": " polymerelements/paper-header-panel",
+    "paper-icon-button": " polymerelements/paper-icon-button",
+    "paper-input": " polymerelements/paper-input",
+    "paper-item": "polymerelements/paper-item",
+    "paper-menu": " polymerelements/paper-menu",
+    "paper-toolbar": "polymerelements/paper-toolbar",
+    "polymer": "Polymer/polymer"
+  }
+}

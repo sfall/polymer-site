@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+  <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+  <link rel="import" href="../bower_components/paper-item/paper-item.html">
+  <link rel="import" href="../bower_components/paper-input/paper-input.html">
+  <link rel="import" href="../bower_components/paper-material/paper-material.html">
+  <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+  <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+</head>
+
+<dom-module id="todo-element">
+  <style>
+    /* CSS rules for your element */
+  </style>
+  <template>
+    <paper-material class="todo" elevation="1">
+      <paper-checkbox checked="{{completed}}"></paper-checkbox>
+      <paper-fab hidden={{editing}}  icon="icons:create" on-tap="doEdit" mini></paper-fab>
+      <paper-fab hidden={{!editing}} icon="icons:done"   on-tap="doEdit" mini></paper-fab>
+      <paper-item hidden="{{editing}}" id="task">{{task}}</paper-item>
+      <paper-input id="edit" hidden="{{!editing}}" value="{{task}}"></paper-input>
+      <paper-item>Created by: <span>{{user}}</span></paper-item>
+      <paper-item>{{time}}</paper-item>
+    </paper-material> <!-- data bindings in local DOM -->
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: "todo-element",
+    properties: {
+      user: {
+        type: String,
+        value: ""
+      },
+      task: {
+        type: String,
+        value: "Hello!"
+      },
+      rid: {
+        type: Number,
+        value: -1
+      },
+      time: {
+        type: String,
+        value: new Date().toLocaleDateString()
+      },
+      completed: {
+        type: Boolean,
+        value: false,
+        observer: 'compChanged'
+      },
+      editing: {
+        type: Boolean,
+        value: false
+      }
+    },
+    compChanged: function (e) {
+      if (e) {
+        this.fire('complete', this);
+      }
+    },
+    doEdit: function (e) {
+      this.editing = !this.editing;
+    }
+  });
+</script>
