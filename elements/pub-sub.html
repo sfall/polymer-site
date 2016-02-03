@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+</head>
+
+<dom-module id="pub-sub">
+  <style>
+    /* CSS rules for your element */
+  </style>
+  <template>
+  </template>
+</dom-module>
+<script>
+  Polymer({
+    is: "pub-sub",
+    properties: {
+      message: {
+        type: Object,
+        value: {}
+      },
+      ws: {
+        type: WebSocket,
+        value: null
+      },
+      server: {
+        type: String,
+        value: "ws://localhost:8080/ws"
+      },
+      pid: {
+        type: String,
+        value: Math.round(Math.random() * 1000).toString()
+      }
+    },
+    open: function () {
+      var self = this;
+      if (this.ws !== null) {
+        this.ws.close();
+      }
+      console.log("Connecting to server...");
+      this.ws = new WebSocket(this.server);
+      this.ws.onopen = function () {
+        var message = JSON.stringify({
+          type: "presence",
+          user: self.pid,
+          value: "open"
+        });
+        self.ws.send(message);
+        console.log("Sent a presence message:");
+        console.log(message);
+      };
+      this.ws.onmessage = function (evt) {
+        var message = JSON.parse(evt.data);
+        console.log("Received message:");
+        console.log(message);
+        self.fire('receipt', message);
+      };
+      this.ws.onclose = function (evt) {
+        var message = {
+            type: "presence",
+            user: self.pid,
+            value: "close"
+          };
+        self.fire('receipt', message);
+      };
+    },
+    publish: function () {
+      this.ws.send(JSON.stringify(this.message));
+    }
+  });
+</script>

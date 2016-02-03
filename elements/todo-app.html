@@ -12,6 +12,7 @@
   <link rel="import" href="../bower_components/paper-item/paper-item.html">
   <link rel="import" href="../bower_components/paper-input/paper-input.html">
   <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+  <link rel="import" href="../elements/pub-sub.html">
   <script src="../js/UUID.js"></script>
 </head>
 
@@ -60,6 +61,7 @@
         </div>
       </paper-header-panel>
     </paper-drawer-panel>
+    <pub-sub id="pubsub" message=""></pub-sub>
   </template>
 </dom-module>
 <script>
@@ -68,7 +70,7 @@
     properties: {
       todo: {
         type: Array,
-        value: [{user: "Coder", task: "Learn Polymer", rid: 0}]
+        value: []
       },
       done: {
         type: Array,
@@ -95,21 +97,57 @@
         usr = "Anonymous";
       }
       this.$.tTask.value = "";
-      this.$.pub.message = {type: "todo", task: tsk, user: usr, rid: UUID.generate()};
-      this.$.pub.publish();
+      this.$.pubsub.message = {
+        type: "todo",
+        task: tsk,
+        user: usr,
+        rid: UUID.generate()
+      };
+      this.$.pubsub.publish();
     },
     handleComplete: function (e) {
+      console.log("Completed a todo");
       var idx = findWithAttr(this.todo, 'rid', e.target.rid),
           itm = this.todo[idx];
 
       itm.task = e.target.task;
       itm.user = this.$.tUser.value;
       itm.type = "done";
-      this.$.pub.message = itm;
-      this.$.pub.publish();
+      this.$.pubsub.message = itm;
+      this.$.pubsub.publish();
+    },
+    receiptCallback: function (e) {
+      console.log("Handling a message...");
+      var idx, itm,
+          item = e.detail;
+      switch (item.type) {
+        case "todo":
+          delete item.type;
+          this.unshift('todo', item);
+          break;
+        case "done":
+          idx = findWithAttr(this.todo, 'rid', item.rid);
+          itm = this.splice('todo', idx, 1)[0];
+          itm.task = item.task;
+          itm.user = item.user;
+          this.push('done', itm);
+          break;
+        case "presence":
+          if (item.value == "open") {
+            this.unshift('present', {user: item.user});
+          } else {
+            idx = findWithAttr(this.presence, 'user', item.user);
+            itm = this.splice('present', idx, 1)[0];
+          };
+          break;
+        default:
+          break;
+      }
     },
     ready: function (e) {
-      this.addEventListener('complete', this.handleComplete)
+      this.addEventListener('complete', this.handleComplete);
+      this.addEventListener('receipt', this.receiptCallback);
+      this.$.pubsub.open();
     }
   });
   function findWithAttr(array, attr, value) {
